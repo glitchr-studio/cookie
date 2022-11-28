@@ -10,7 +10,7 @@
 
 })(this, function () {
 
-   var  CookieConsent = window.CookieConsent = {};
+    var CookieConsent = window.CookieConsent = {};
         CookieConsent.version = '0.1.0';
 
     var Settings = CookieConsent.settings = {
