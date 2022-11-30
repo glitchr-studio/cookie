@@ -1,6 +1,6 @@
 {
   "name": "@glitchr/cookie-consent",
-  "version": "1.0.7",
+  "version": "1.0.19",
   "description": "Cookie Consent Tool",
   "main": "src/index.js",
   "repository": {
