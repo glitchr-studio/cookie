@@ -270,7 +270,16 @@
             }
         }
 
-        if(reload) location.reload();
+        if(reloadIfNotSet) {
+            $.ajax({type: "GET",    
+                url: window.localtion.href,
+                cache: false,
+                crossDomain: true,
+                dataType: 'json',
+                xhrFields: { withCredentials: true },
+                success: function (data) { console.log(data); }
+            });
+        }
     }
 
     CookieConsent.deleteCookies = function(groupname = "", path = "/") {
