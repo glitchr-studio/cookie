@@ -270,7 +270,8 @@
             }
         }
 
-        if(reloadIfNotSet) {
+        if(reload) {
+
             $.ajax({type: "GET",
                 url: window.location.href,
                 cache: false,
