@@ -1,10 +1,10 @@
 {
-  "name": "@glitchr/cookie-consent",
+  "name": "@glitchr/cookie",
   "version": "1.0.37",
-  "description": "Cookie Consent Tool",
+  "description": "Cookie Tool",
   "main": "src/index.js",
   "repository": {
-    "url": "ssh://git@gitlab.glitchr.dev:public-repository/javascript/cookie-consent.git",
+    "url": "ssh://git@gitlab.glitchr.dev:public-repository/javascript/cookie.git",
     "type": "git"
   },
   "author": "Marco Meyer <marco.meyer@glitchr.io>",

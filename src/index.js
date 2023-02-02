@@ -5,22 +5,22 @@
     } else if (typeof exports === 'object') {
         module.exports = factory();
     } else {
-        root.CookieConsent = factory();
+        root.Cookie = factory();
     }
 
 })(this, function () {
 
-   var  CookieConsent = window.CookieConsent = {};
-        CookieConsent.version = '0.1.0';
+   var  Cookie = window.Cookie = {};
+        Cookie.version = '0.1.0';
 
-    var Settings = CookieConsent.settings = {
-        "groupnames" : ["necessary", "analytical", "marketing"],
+    var Settings = Cookie.options = {
+        "groupnames" : [],
     };
 
     var debug = false;
     var ready = false;
 
-    CookieConsent.reset = function(el = undefined) {
+    Cookie.reset = function(el = undefined) {
 
         var targetData = jQuery.data(el || document.documentElement);
         Object.keys(targetData).forEach((key) => delete targetData[key]);
@@ -29,24 +29,24 @@
         return this;
     }
 
-    CookieConsent.ready = function (options = {})
+    Cookie.ready = function (options = {})
     {
         if("debug" in options)
             debug = options["debug"];
 
-        CookieConsent.configure(options);
+        Cookie.configure(options);
         ready = true;
 
-        if (debug) console.log("CookieConsent is ready.");
+        if (debug) console.log("Cookie is ready.");
         dispatchEvent(new Event('cookie-consent:ready'));
 
-        CookieConsent.refresh();
+        Cookie.refresh();
         return this;
     };
 
-    CookieConsent.getNConfirmedConsents = function(groupname = undefined) { return this.getNConsents(groupname, true ); }
-    CookieConsent.getNDeniedConsents    = function(groupname = undefined) { return this.getNConsents(groupname, false); }
-    CookieConsent.getNConsents          = function(groupname = undefined, value = null) 
+    Cookie.getNConfirmedConsents = function(groupname = undefined) { return this.getNConsents(groupname, true ); }
+    Cookie.getNDeniedConsents    = function(groupname = undefined) { return this.getNConsents(groupname, false); }
+    Cookie.getNConsents          = function(groupname = undefined, value = null) 
     {
         var N = 0;
         value = value != null ? Boolean(value) : null;
@@ -55,7 +55,7 @@
 
             if(groupname != undefined && groupname != _groupname) return;
 
-            consent = CookieConsent.checkConsent(_groupname) || null;
+            consent = Cookie.checkConsent(_groupname) || null;
 
             if(consent == value || value === null) N++;
         });
@@ -63,7 +63,7 @@
         return N;
     }
 
-    CookieConsent.refresh = function(defaultConsentDisplayed = false)
+    Cookie.refresh = function(defaultConsentDisplayed = false)
     {
         // Check out global consent
         if(this.getNConfirmedConsents() > 1) consent = true;
@@ -78,46 +78,46 @@
         }
     };
 
-    CookieConsent.get = function(key) {
+    Cookie.getOption = function(key) {
     
-        if(key in CookieConsent.settings) 
-            return CookieConsent.settings[key];
+        if(key in Cookie.options) 
+            return Cookie.options[key];
 
         return null;
     };
 
-    CookieConsent.set = function(key, value) {
+    Cookie.setOption = function(key, value) {
     
-        CookieConsent.settings[key] = value;
+        Cookie.options[key] = value;
         return this;
     };
 
-    CookieConsent.add = function(key, value) {
+    Cookie.addOption = function(key, value) {
     
-        if(! (key in CookieConsent.settings))
-            CookieConsent.settings[key] = [];
+        if(! (key in Cookie.options))
+            Cookie.options[key] = [];
 
-        if (CookieConsent.settings[key].indexOf(value) === -1)
-            CookieConsent.settings[key].push(value);
+        if (Cookie.options[key].indexOf(value) === -1)
+            Cookie.options[key].push(value);
 
         return this;
     };
 
-    CookieConsent.remove = function(key, value) {
+    Cookie.removeOption = function(key, value) {
 
-        if(key in CookieConsent.settings) {
+        if(key in Cookie.options) {
 
-            CookieConsent.settings[key] = CookieConsent.settings[key].filter(function(setting, index, arr){ 
-                return value != setting;
+            Cookie.options[key] = Cookie.options[key].filter(function(option, index, arr){
+                return value != option;
             });
 
-            return CookieConsent.settings[key];
+            return Cookie.options[key];
         }
 
         return null;
     };
 
-    CookieConsent.configure = function (options) {
+    Cookie.configure = function (options) {
 
         var key, value;
         for (key in options) {
@@ -125,19 +125,52 @@
             if (value !== undefined && options.hasOwnProperty(key)) Settings[key] = value;
         }
 
-        if (debug) console.log("CookieConsent configuration: ", Settings);
+        if (debug) console.log("Cookie configuration: ", Settings);
 
         return this;
     }
 
-    CookieConsent.onLoad = function (el = window)
+    Cookie.onConfirm = function(onConfirm)
     {
-        CookieConsent.reset(el);
+        $(window).on("cookie-consent:confirm", onConfirm);
+        return this;
+    }
+
+    Cookie.onDeny = function(onDeny)
+    {
+        $(window).on("cookie-consent:deny", onDeny);
+        return this;
+    }
+
+    Cookie.onCheck = function(onCheck)
+    {
+        $(window).on("cookie-consent:check", onCheck);
+        return this;
+    }
+
+    Cookie.onLoad = function (el = window)
+    {
+        Cookie.reset(el);
 
         return this;
     }
 
-    CookieConsent.change = function(consent, groupname = undefined)
+    Cookie.getConsents  = function() {
+
+        var consents = [];
+
+        for (var i = 0; i < localStorage.length; i++) {
+
+            if (localStorage.key(i).indexOf('cookie-consent/') >= 0)
+                consents.push(localStorage.key(i));
+        }
+
+        return consents;
+    }
+
+    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie-consent/" + groupname) || null); }
+
+    Cookie.setConsent = function(consent, groupname = undefined)
     {
         this.addGroup(groupname);
 
@@ -147,18 +180,17 @@
             if (Array.isArray(groupname) && !_groupname in grouname) return;
             if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
 
-            console.log(_groupname, groupname);
-            localStorage.setItem("cookie-consent/" + _groupname, consent);
-            if(consent == false) CookieConsent.deleteCookies(_groupname);
+            localStorage.setItem("cookie/" + _groupname, consent);
+            if(consent == false) Cookie.delete(_groupname);
         });
 
         this.refresh();
     }
 
-    CookieConsent.getCookie = function(groupname, name)
+    Cookie.get = function(groupname, name)
     {
         var dc = document.cookie;
-        var prefix = groupname+":"+name + "=";
+        var prefix = groupname+"/"+name + "=";
 
         var begin = dc.indexOf("; " + prefix);
         if (begin == -1) {
@@ -176,26 +208,7 @@
         return decodeURI(dc.substring(begin + prefix.length, end));
     } 
 
-
-    CookieConsent.onConfirm = function(onConfirm) 
-    {
-        $(window).on("cookie-consent:confirm", onConfirm);
-        return this;
-    }
-
-    CookieConsent.onDeny = function(onDeny) 
-    {
-        $(window).on("cookie-consent:deny", onDeny);
-        return this;
-    }
-
-    CookieConsent.onCheck = function(onCheck) 
-    {
-        $(window).on("cookie-consent:check", onCheck);
-        return this;
-    }
-
-    CookieConsent.addGroup  = function(groupname) 
+    Cookie.addGroup  = function(groupname) 
     {
         if(groupname === undefined)
             return this;
@@ -206,22 +219,7 @@
         return this;
     }
 
-    CookieConsent.getConsents  = function() {
-
-        var consents = [];
-        
-        for (var i = 0; i < localStorage.length; i++) {
-
-            if (localStorage.key(i).indexOf('cookie-consent/') >= 0)
-                consents.push(localStorage.key(i));
-        }
-
-        return consents;
-    }
-
-    CookieConsent.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie-consent/" + groupname) || null); }
-
-    CookieConsent.setCookie = function(groupname, name, value, expires, reloadIfNotSet = false, path = "/")
+    Cookie.set = function(groupname, name, value, expires, reloadIfNotSet = false, path = "/")
     {
         var reload = false;
         if (!(expires instanceof Date)) {
@@ -251,15 +249,15 @@
 
         try {
             
-            document.cookie = groupname + ":" + name + "=" + value +
+            document.cookie = groupname + "/" + name + "=" + value +
                 ";path=" + path +
                 ";expires = " + expires.toGMTString() + "; SameSite=Strict; secure";
-        
-        } catch (e) { 
+
+        } catch (e) {
 
             try { 
 
-                document.cookie = groupname + ":" + name + "=" + value +
+                document.cookie = groupname + "/" + name + "=" + value +
                     ";path=" + path +
                     ";expires = " + expires.toGMTString() + "; SameSite=Strict;";
 
@@ -273,21 +271,20 @@
         if(reload) location.reload();
     }
 
-    CookieConsent.deleteCookies = function(groupname = "", path = "/") {
+    Cookie.delete = function(groupname = "", name = "", path = "/") {
 
         var cookieList = document.cookie.split(";");
-
         for(var i = 0; i < cookieList.length; i++) {
 
             var cookie = cookieList[i].trim();
             var cookieName = cookie.split("=")[0];
 
             // If the prefix of the cookie's name matches the one specified, remove it
-            if(cookieName.indexOf(groupname ? groupname+":" : "") === 0)
+            if(cookieName.indexOf(groupname ? groupname+"/" : "") === 0)
                 document.cookie = cookieName + "=null;expires=Thu, 01 Jan 1970 00:00:00 GMT; path="+path;
         }
     }
 
-    $(window).on("load", () => CookieConsent.onLoad());
-    return CookieConsent;
+    $(window).on("load", () => Cookie.onLoad());
+    return Cookie;
 });
