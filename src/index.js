@@ -25,7 +25,7 @@
         var targetData = jQuery.data(el || document.documentElement);
         Object.keys(targetData).forEach((key) => delete targetData[key]);
 
-        $(window).off("cookie-consent");
+        $(window).off("cookie");
         return this;
     }
 
@@ -38,7 +38,7 @@
         ready = true;
 
         if (debug) console.log("Cookie is ready.");
-        dispatchEvent(new Event('cookie-consent:ready'));
+        dispatchEvent(new Event('cookie:ready'));
 
         Cookie.refresh();
         return this;
@@ -73,9 +73,9 @@
         // Display new state
         switch(consent) {
 
-            case null: return $(window).trigger("cookie-consent:check");
-            case true: return $(window).trigger("cookie-consent:confirm");
-            case false: return $(window).trigger("cookie-consent:deny");
+            case null: return $(window).trigger("cookie:check");
+            case true: return $(window).trigger("cookie:confirm");
+            case false: return $(window).trigger("cookie:deny");
         }
     };
 
@@ -133,19 +133,19 @@
 
     Cookie.onConfirm = function(onConfirm)
     {
-        $(window).on("cookie-consent:confirm", onConfirm);
+        $(window).on("cookie:confirm", onConfirm);
         return this;
     }
 
     Cookie.onDeny = function(onDeny)
     {
-        $(window).on("cookie-consent:deny", onDeny);
+        $(window).on("cookie:deny", onDeny);
         return this;
     }
 
     Cookie.onCheck = function(onCheck)
     {
-        $(window).on("cookie-consent:check", onCheck);
+        $(window).on("cookie:check", onCheck);
         return this;
     }
 
@@ -162,14 +162,14 @@
 
         for (var i = 0; i < localStorage.length; i++) {
 
-            if (localStorage.key(i).indexOf('cookie-consent/') >= 0)
+            if (localStorage.key(i).indexOf('cookie/') >= 0)
                 consents.push(localStorage.key(i));
         }
 
         return consents;
     }
 
-    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie-consent/" + groupname) || null); }
+    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie/" + groupname) || null); }
 
     Cookie.setConsent = function(consent, groupname = undefined)
     {
@@ -191,6 +191,9 @@
 
     Cookie.get = function(groupname, name)
     {
+        groupname = groupname.toUpperCase();
+        name      = name.toUpperCase();
+
         var dc = document.cookie;
         var prefix = groupname+"/"+name + "=";
 
@@ -223,6 +226,9 @@
 
     Cookie.set = function(groupname, name, value, expires, reloadIfNotSet = false, path = "/")
     {
+        groupname = groupname.toUpperCase();
+        name      = name.toUpperCase();
+
         var reload = false;
         if (!(expires instanceof Date)) {
 
@@ -273,7 +279,9 @@
         if(reload) location.reload();
     }
 
-    Cookie.delete = function(groupname = "", name = "", path = "/") {
+    Cookie.delete = function(groupname = "",  path = "/") {
+
+        groupname = groupname.toUpperCase();
 
         var cookieList = document.cookie.split(";");
         for(var i = 0; i < cookieList.length; i++) {
