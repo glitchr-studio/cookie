@@ -10,8 +10,8 @@
 
 })(this, function () {
 
-   var  Cookie = window.Cookie = {};
-        Cookie.version = '0.1.0';
+    var  Cookie = window.Cookie = {};
+    Cookie.version = '0.1.0';
 
     var Settings = Cookie.options = {
         "groupnames" : [],
@@ -24,7 +24,7 @@
 
         var targetData = jQuery.data(el || document.documentElement);
         Object.keys(targetData).forEach((key) => delete targetData[key]);
-        
+
         $(window).off("cookie-consent");
         return this;
     }
@@ -46,19 +46,20 @@
 
     Cookie.getNConfirmedConsents = function(groupname = undefined) { return this.getNConsents(groupname, true ); }
     Cookie.getNDeniedConsents    = function(groupname = undefined) { return this.getNConsents(groupname, false); }
-    Cookie.getNConsents          = function(groupname = undefined, value = null) 
+    Cookie.getNConsents          = function(groupname = undefined, value = null)
     {
         var N = 0;
         value = value != null ? Boolean(value) : null;
-        
-        this.get("groupnames").forEach(function (_groupname) {
 
-            if(groupname != undefined && groupname != _groupname) return;
+        var groupnames = this.getOption("groupnames") || [];
+            groupnames.forEach(function (_groupname) {
 
-            consent = Cookie.checkConsent(_groupname) || null;
+                if(groupname != undefined && groupname != _groupname) return;
 
-            if(consent == value || value === null) N++;
-        });
+                consent = Cookie.checkConsent(_groupname) || null;
+
+                if(consent == value || value === null) N++;
+            });
 
         return N;
     }
@@ -79,21 +80,21 @@
     };
 
     Cookie.getOption = function(key) {
-    
-        if(key in Cookie.options) 
+
+        if(key in Cookie.options)
             return Cookie.options[key];
 
         return null;
     };
 
     Cookie.setOption = function(key, value) {
-    
+
         Cookie.options[key] = value;
         return this;
     };
 
     Cookie.addOption = function(key, value) {
-    
+
         if(! (key in Cookie.options))
             Cookie.options[key] = [];
 
@@ -172,10 +173,11 @@
 
     Cookie.setConsent = function(consent, groupname = undefined)
     {
+        consent = Boolean(consent)
         this.addGroup(groupname);
 
-        consent = Boolean(consent)
-        this.get("groupnames").forEach(function (_groupname) {
+        var groupnames = this.getOption("groupnames") || [];
+        groupnames.forEach(function (_groupname) {
 
             if (Array.isArray(groupname) && !_groupname in grouname) return;
             if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
@@ -206,9 +208,9 @@
         }
 
         return decodeURI(dc.substring(begin + prefix.length, end));
-    } 
+    }
 
-    Cookie.addGroup  = function(groupname) 
+    Cookie.addGroup  = function(groupname)
     {
         if(groupname === undefined)
             return this;
@@ -237,25 +239,25 @@
             }
         }
 
-        if(this.checkConsent(groupname) === false) 
+        if(this.checkConsent(groupname) === false)
             return;
 
         // Already came here..
-        var cookie = this.getCookie(groupname, name);
+        var cookie = this.get(groupname, name);
         if (cookie == null) reload = reloadIfNotSet;
 
         if(typeof value == "object")
             value = JSON.stringify(value);
 
         try {
-            
+
             document.cookie = groupname + "/" + name + "=" + value +
                 ";path=" + path +
                 ";expires = " + expires.toGMTString() + "; SameSite=Strict; secure";
 
         } catch (e) {
 
-            try { 
+            try {
 
                 document.cookie = groupname + "/" + name + "=" + value +
                     ";path=" + path +
@@ -264,7 +266,7 @@
             } catch (e) {
 
                 console.error(e);
-                reload = false; 
+                reload = false;
             }
         }
 
