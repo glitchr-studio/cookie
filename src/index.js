@@ -14,7 +14,7 @@
     Cookie.version = '0.1.0';
 
     var Settings = Cookie.options = {
-        "groupnames" : [],
+        "groups" : [],
     };
 
     var debug = false;
@@ -51,8 +51,8 @@
         var N = 0;
         value = value != null ? Boolean(value) : null;
 
-        var groupnames = this.getOption("groupnames") || [];
-            groupnames.forEach(function (_groupname) {
+        var groups = this.getOption("groups") || [];
+            groups.forEach(function (_groupname) {
 
                 if(groupname != undefined && groupname != _groupname) return;
 
@@ -176,8 +176,8 @@
         consent = Boolean(consent)
         this.addGroup(groupname);
 
-        var groupnames = this.getOption("groupnames") || [];
-        groupnames.forEach(function (_groupname) {
+        var groups = this.getOption("groups") || [];
+        groups.forEach(function (_groupname) {
 
             if (Array.isArray(groupname) && !_groupname in grouname) return;
             if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
