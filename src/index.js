@@ -13,8 +13,8 @@
     var  Cookie = window.Cookie = {};
     Cookie.version = '0.1.0';
 
-    var Settings = Cookie.options = {
-        "groupnames" : [],
+    var Options = Cookie.options = {
+        "groups" : [],
     };
 
     var debug = false;
@@ -44,22 +44,17 @@
         return this;
     };
 
-    Cookie.getNConfirmedConsents = function(groupname = undefined) { return this.getNConsents(groupname, true ); }
-    Cookie.getNDeniedConsents    = function(groupname = undefined) { return this.getNConsents(groupname, false); }
-    Cookie.getNConsents          = function(groupname = undefined, value = null)
+    Cookie.hasConsents = function(groupname = undefined, value = null)
     {
         var N = 0;
         value = value != null ? Boolean(value) : null;
 
-        var groupnames = this.getOption("groupnames") || [];
-            groupnames.forEach(function (_groupname) {
+        var groups = this.getOption("groups") || [];
+        Object.entries(groups).forEach(function ([_groupname, consent]) {
 
-                if(groupname != undefined && groupname != _groupname) return;
-
-                consent = Cookie.checkConsent(_groupname) || null;
-
-                if(consent == value || value === null) N++;
-            });
+            if(groupname != undefined && groupname != _groupname) return;
+            if(consent == value || value === null) N++;
+        });
 
         return N;
     }
@@ -67,7 +62,7 @@
     Cookie.refresh = function(defaultConsentDisplayed = false)
     {
         // Check out global consent
-        if(this.getNConfirmedConsents() > 1) consent = true;
+        if(this.hasConsents() > 0) consent = true;
         else consent = defaultConsentDisplayed;
 
         // Display new state
@@ -123,10 +118,10 @@
         var key, value;
         for (key in options) {
             value = options[key];
-            if (value !== undefined && options.hasOwnProperty(key)) Settings[key] = value;
+            if (value !== undefined && options.hasOwnProperty(key)) Options[key] = value;
         }
 
-        if (debug) console.log("Cookie configuration: ", Settings);
+        if (debug) console.log("Cookie configuration: ", Options);
 
         return this;
     }
@@ -152,7 +147,6 @@
     Cookie.onLoad = function (el = window)
     {
         Cookie.reset(el);
-
         return this;
     }
 
@@ -169,15 +163,20 @@
         return consents;
     }
 
-    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie/" + groupname) || null); }
+    Cookie.declare = function(groupname) {
 
+        this.addGroup(groupname);
+        this.refresh();
+    }
+
+    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie/" + groupname) || null); }
     Cookie.setConsent = function(consent, groupname = undefined)
     {
         consent = Boolean(consent)
         this.addGroup(groupname);
 
-        var groupnames = this.getOption("groupnames") || [];
-        groupnames.forEach(function (_groupname) {
+        var groups = this.getOption("groups") || [];
+        Object.entries(groups).forEach(function ([_groupname, _]) {
 
             if (Array.isArray(groupname) && !_groupname in grouname) return;
             if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
@@ -217,10 +216,10 @@
     {
         if(groupname === undefined)
             return this;
-        if(groupname in Settings.groups)
+        if(groupname in Options.groups)
             return this;
 
-        Settings.groups[groupname] = null;
+        Options.groups[groupname] = null;
         return this;
     }
 
