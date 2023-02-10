@@ -44,23 +44,26 @@
         return this;
     };
 
-    Cookie.hasConsents = function(groupname = undefined, value = null)
+    Cookie.hasConsents = function(groupname = undefined)
     {
         var N = 0;
-        value = value != null ? Boolean(value) : null;
 
         var groups = this.getOption("groups") || [];
-        Object.entries(groups).forEach(function ([_groupname, consent]) {
+            groups.forEach(function (_groupname) {
 
-            if(groupname != undefined && groupname != _groupname) return;
-            if(consent == value || value === null) N++;
-        });
+                if(groupname != undefined && groupname != _groupname) return;
+
+                var consent = Cookie.checkConsent(_groupname);
+                if (consent == true || consent == null) N++;
+            });
 
         return N;
     }
 
     Cookie.refresh = function(defaultConsentDisplayed = false)
     {
+        var groups = this.getOption("groups") || [];
+
         // Check out global consent
         if(this.hasConsents() > 0) consent = true;
         else consent = defaultConsentDisplayed;
@@ -169,21 +172,21 @@
         this.refresh();
     }
 
-    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie/" + groupname) || null); }
+    Cookie.checkConsent = function(groupname) { return JSON.parse(localStorage.getItem("cookie/" + groupname)) ?? null; }
     Cookie.setConsent = function(consent, groupname = undefined)
     {
         consent = Boolean(consent)
         this.addGroup(groupname);
 
         var groups = this.getOption("groups") || [];
-        Object.entries(groups).forEach(function ([_groupname, _]) {
+            groups.forEach(function (_groupname) {
 
-            if (Array.isArray(groupname) && !_groupname in grouname) return;
-            if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
+                if (Array.isArray(groupname) && !_groupname in grouname) return;
+                if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
 
-            localStorage.setItem("cookie/" + _groupname, consent);
-            if(consent == false) Cookie.delete(_groupname);
-        });
+                localStorage.setItem("cookie/" + _groupname, consent);
+                if(consent == false) Cookie.delete(_groupname);
+            });
 
         this.refresh();
     }
@@ -216,10 +219,10 @@
     {
         if(groupname === undefined)
             return this;
-        if(groupname in Options.groups)
+        if(Options.groups.indexOf(groupname) >= 0)
             return this;
 
-        Options.groups[groupname] = null;
+        Options.groups.push(groupname);
         return this;
     }
 
