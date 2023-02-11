@@ -1,6 +1,6 @@
 {
   "name": "@glitchr/cookie",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "description": "Cookie Tool",
   "main": "src/index.js",
   "repository": {
