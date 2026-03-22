@@ -1,16 +1,16 @@
 (function (root, factory) {
 
-   if (typeof define === 'function' && define.amd) {
-       define(factory);
-   } else if (typeof exports === 'object') {
-       module.exports = factory();
-   } else {
-       root.Cookie = factory();
-   }
+    if (typeof define === 'function' && define.amd) {
+        define(factory);
+    } else if (typeof exports === 'object') {
+        module.exports = factory();
+    } else {
+        root.Cookie = factory();
+    }
 
 })(this, function () {
 
-    const  Cookie = window.Cookie = {};
+    const Cookie = window.Cookie = {};
     Cookie.version = '0.1.0';
 
     const Options = Cookie.options = {
@@ -54,7 +54,7 @@
                 if(groupname !== undefined && groupname !== _groupname) return;
 
                 const consent = Cookie.checkConsent(_groupname);
-                if (consent === true || consent == null) N++;
+                if (consent === true || consent === null) N++;
             });
 
         return N;
@@ -253,7 +253,7 @@
 
         // Already came here..
         const cookie = this.get(groupname, name);
-        if (cookie == null) reload = reloadIfNotSet;
+        if (cookie === null) reload = reloadIfNotSet;
 
         if(typeof value === "object")
             value = JSON.stringify(value);
