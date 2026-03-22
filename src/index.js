@@ -1,28 +1,28 @@
 (function (root, factory) {
- 
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory();
-    } else {
-        root.Cookie = factory();
-    }
+
+   if (typeof define === 'function' && define.amd) {
+       define(factory);
+   } else if (typeof exports === 'object') {
+       module.exports = factory();
+   } else {
+       root.Cookie = factory();
+   }
 
 })(this, function () {
 
-    var  Cookie = window.Cookie = {};
+    const  Cookie = window.Cookie = {};
     Cookie.version = '0.1.0';
 
-    var Options = Cookie.options = {
+    const Options = Cookie.options = {
         "groups" : [],
     };
 
-    var debug = false;
-    var ready = false;
+    let debug = false;
+    let ready = false;
 
     Cookie.reset = function(el = undefined) {
 
-        var targetData = jQuery.data(el || document.documentElement);
+        const targetData = jQuery.data(el || document.documentElement);
         Object.keys(targetData).forEach((key) => delete targetData[key]);
 
         $(window).off("cookie");
@@ -46,15 +46,15 @@
 
     Cookie.hasConsents = function(groupname = undefined)
     {
-        var N = 0;
+        let N = 0;
 
-        var groups = this.getOption("groups") || [];
+        const groups = this.getOption("groups") || [];
             groups.forEach(function (_groupname) {
 
-                if(groupname != undefined && groupname != _groupname) return;
+                if(groupname !== undefined && groupname !== _groupname) return;
 
-                var consent = Cookie.checkConsent(_groupname);
-                if (consent == true || consent == null) N++;
+                const consent = Cookie.checkConsent(_groupname);
+                if (consent === true || consent == null) N++;
             });
 
         return N;
@@ -62,9 +62,10 @@
 
     Cookie.refresh = function(defaultConsentDisplayed = false)
     {
-        var groups = this.getOption("groups") || [];
+        const groups = this.getOption("groups") || [];
 
         // Check out global consent
+        let consent;
         if(this.hasConsents() > 0) consent = true;
         else consent = defaultConsentDisplayed;
 
@@ -107,7 +108,7 @@
         if(key in Cookie.options) {
 
             Cookie.options[key] = Cookie.options[key].filter(function(option, index, arr){
-                return value != option;
+                return value !== option;
             });
 
             return Cookie.options[key];
@@ -118,7 +119,7 @@
 
     Cookie.configure = function (options) {
 
-        var key, value;
+        let key, value;
         for (key in options) {
             value = options[key];
             if (value !== undefined && options.hasOwnProperty(key)) Options[key] = value;
@@ -155,9 +156,9 @@
 
     Cookie.getConsents  = function() {
 
-        var consents = [];
+        const consents = [];
 
-        for (var i = 0; i < localStorage.length; i++) {
+        for (let i = 0; i < localStorage.length; i++) {
 
             if (localStorage.key(i).indexOf('cookie/') >= 0)
                 consents.push(localStorage.key(i));
@@ -178,14 +179,14 @@
         consent = Boolean(consent)
         this.addGroup(groupname);
 
-        var groups = this.getOption("groups") || [];
+        const groups = this.getOption("groups") || [];
             groups.forEach(function (_groupname) {
 
-                if (Array.isArray(groupname) && !_groupname in grouname) return;
-                if(!Array.isArray(groupname) && groupname != _groupname & groupname !== undefined) return;
+                if (Array.isArray(groupname) && !groupname.includes(_groupname)) return;
+                if(!Array.isArray(groupname) && groupname !== _groupname && groupname !== undefined) return;
 
                 localStorage.setItem("cookie/" + _groupname, consent);
-                if(consent == false) Cookie.delete(_groupname);
+                if(consent === false) Cookie.delete(_groupname);
             });
 
         this.refresh();
@@ -196,20 +197,20 @@
         groupname = groupname.toUpperCase();
         name      = name.toUpperCase();
 
-        var dc = document.cookie;
-        var prefix = groupname+"/"+name + "=";
+        const dc = document.cookie;
+        const prefix = groupname+"/"+name + "=";
 
-        var begin = dc.indexOf("; " + prefix);
-        if (begin == -1) {
+        let begin = dc.indexOf("; " + prefix);
+        if (begin === -1) {
 
             begin = dc.indexOf(prefix);
-            if (begin != 0) return null;
+            if (begin !== 0) return null;
 
         } else {
 
             begin += 2;
-            var end = document.cookie.indexOf(";", begin);
-            if (end == -1) end = dc.length;
+            let end = document.cookie.indexOf(";", begin);
+            if (end === -1) end = dc.length;
         }
 
         return decodeURI(dc.substring(begin + prefix.length, end));
@@ -231,7 +232,7 @@
         groupname = groupname.toUpperCase();
         name      = name.toUpperCase();
 
-        var reload = false;
+        let reload = false;
         if (!(expires instanceof Date)) {
 
             switch(typeof expires) {
@@ -241,7 +242,7 @@
                     break;
 
                 default:
-                    date = new Date();
+                    let date = new Date();
                     date.setTime(date.getTime() + Number(expires) * 1000);
                     expires = date;
             }
@@ -251,17 +252,17 @@
             return;
 
         // Already came here..
-        var cookie = this.get(groupname, name);
+        const cookie = this.get(groupname, name);
         if (cookie == null) reload = reloadIfNotSet;
 
-        if(typeof value == "object")
+        if(typeof value === "object")
             value = JSON.stringify(value);
 
         try {
 
             document.cookie = groupname + "/" + name + "=" + value +
                 ";path=" + path +
-                ";expires = " + expires.toGMTString() + "; SameSite=Strict; secure";
+                ";expires = " + expires.toUTCString() + "; SameSite=Strict; secure";
 
         } catch (e) {
 
@@ -269,7 +270,7 @@
 
                 document.cookie = groupname + "/" + name + "=" + value +
                     ";path=" + path +
-                    ";expires = " + expires.toGMTString() + "; SameSite=Strict;";
+                    ";expires = " + expires.toUTCString() + "; SameSite=Strict;";
 
             } catch (e) {
 
@@ -285,11 +286,11 @@
 
         groupname = groupname.toUpperCase();
 
-        var cookieList = document.cookie.split(";");
-        for(var i = 0; i < cookieList.length; i++) {
+        const cookieList = document.cookie.split(";");
+        for(let i = 0; i < cookieList.length; i++) {
 
-            var cookie = cookieList[i].trim();
-            var cookieName = cookie.split("=")[0];
+            const cookie = cookieList[i].trim();
+            const cookieName = cookie.split("=")[0];
 
             // If the prefix of the cookie's name matches the one specified, remove it
             if(cookieName.indexOf(groupname ? groupname+"/" : "") === 0)
