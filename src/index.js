@@ -191,16 +191,18 @@
 
         this.refresh();
     }
-
+    
     Cookie.get = function(groupname, name)
     {
         groupname = groupname.toUpperCase();
         name      = name.toUpperCase();
 
         const dc = document.cookie;
-        const prefix = groupname+"/"+name + "=";
+        const prefix = groupname + "/" + name + "=";
 
         let begin = dc.indexOf("; " + prefix);
+        let end;
+
         if (begin === -1) {
 
             begin = dc.indexOf(prefix);
@@ -209,9 +211,10 @@
         } else {
 
             begin += 2;
-            let end = document.cookie.indexOf(";", begin);
-            if (end === -1) end = dc.length;
         }
+
+        end = dc.indexOf(";", begin);
+        if (end === -1) end = dc.length;
 
         return decodeURI(dc.substring(begin + prefix.length, end));
     }
