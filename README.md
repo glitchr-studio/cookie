@@ -1,6 +1,17 @@
 # Cookie Consent
 
-
+> **This library now lives in [`@glitchr/flowjs`](https://github.com/glitchr-studio/flowjs)**, as its `cookie` module. This package is frozen at 1.0.53 and deprecated.
+>
+> ```js
+> // before
+> import '@glitchr/cookie';
+> // after
+> import '@glitchr/flowjs/cookie';
+> ```
+>
+> The `Cookie` global and its methods keep their names and their meaning; the module adds declared consent
+> categories, declared storage and a banner with a detailed section. Its documentation is
+> [`docs/cookie.md`](https://github.com/glitchr-studio/flowjs/blob/master/docs/cookie.md) in flowjs.
 
 ## Getting started
 
